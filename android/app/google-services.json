@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "859432992370",
+    "project_id": "classifiedfire-52b50",
+    "storage_bucket": "classifiedfire-52b50.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:859432992370:android:6ffa4345f160f2a331cceb",
+        "android_client_info": {
+          "package_name": "com.appmaking.classifiedfire"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "859432992370-qcvn537d17t9boi82bq0jhjh3ijb37i1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcXzaWw3oQ49OT5QWsUtsHpiSEhky04tM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "859432992370-qcvn537d17t9boi82bq0jhjh3ijb37i1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
