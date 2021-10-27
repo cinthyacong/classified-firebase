@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ContactDetail extends StatelessWidget {
-  String imgURL = "";
+  var imgURL;
   String title = "";
   String description = "";
   String price = "";

@@ -25,14 +25,19 @@ class _MyAdsState extends State<MyAds> {
         // .limit(3)
         .get()
         .then((res) {
+      // print(res.docs);
       var tmpAds = [];
       res.docs.forEach((ad) {
+        print(ad.data());
         tmpAds.add({
+          // "id": ad.data()["id"],
           "title": ad.data()["title"],
           "description": ad.data()["description"],
           "price": ad.data()["price"],
+          "mobile": ad.data()["mobile"],
           "imageURL": ad.data()["imageURL"]
         });
+        print(tmpAds);
       });
       setState(() {
         ads = tmpAds;
@@ -68,10 +73,11 @@ class _MyAdsState extends State<MyAds> {
             return GestureDetector(
                 onTap: () => Get.to(EditAd(
                     imgURL: ads[index]['imageURL'],
+                    // id: ads[index]['ad_id'],
                     title: ads[index]['title'],
                     description: ads[index]['description'],
                     price: ads[index]['price'],
-                    mobile: ads[index]['mobile'])),
+                    mobile: ads[index]['mobile'].toString())),
                 child: Card(
                     child: Row(
                   children: [
@@ -79,17 +85,8 @@ class _MyAdsState extends State<MyAds> {
                       margin: EdgeInsets.only(left: 10, right: 10),
                       height: 70,
                       width: 70,
-                      child: Image.network("${ads[index]['imageURL']}",
+                      child: Image.network("${ads[index]['imageURL'][0]}",
                           fit: BoxFit.cover),
-                      // child: CachedNetworkImage(
-                      //   imageUrl: "${ads[index]['imageURL']}",
-                      //   progressIndicatorBuilder:
-                      //       (context, url, downloadProgress) =>
-                      //           CircularProgressIndicator(
-                      //               value: downloadProgress.progress),
-                      //   errorWidget: (context, url, error) =>
-                      //       Icon(Icons.error),
-                      // )
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

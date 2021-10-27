@@ -2,16 +2,21 @@
 import 'package:classifiedfire/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:math';
 
 class EditAd extends StatefulWidget {
-  List imgURL = [];
+  var imgURL = [];
   String title = "";
   String description = "";
   String price = "";
   String mobile = "";
-  // int id;
+
+  // // int id;
 
   EditAd({
     required this.imgURL,
@@ -19,60 +24,68 @@ class EditAd extends StatefulWidget {
     required this.description,
     required this.price,
     required this.mobile,
-    // required this.id,
-
-    // required this.user
   });
 
   _EditAdState createState() => _EditAdState();
 }
 
 class _EditAdState extends State<EditAd> {
-//   @override
-//   void initState() {
-//     setState(() {
-//       _titleUpdate.text = widget.title;
-//       _descriptionUpdate.text = widget.description;
-//       _priceUpdate.text = widget.price;
-//       _mobileUpdate.text = widget.mobile;
-//     });
-//     super.initState();
-//   }
+  @override
+  void initState() {
+    setState(() {
+      _titleUpdate.text = widget.title;
+      _descriptionUpdate.text = widget.description;
+      _priceUpdate.text = widget.price;
+      _mobileUpdate.text = widget.mobile;
+      // userID = widget.user;
+    });
+    super.initState();
+  }
 
   TextEditingController _titleUpdate = TextEditingController();
   TextEditingController _descriptionUpdate = TextEditingController();
   TextEditingController _priceUpdate = TextEditingController();
   TextEditingController _mobileUpdate = TextEditingController();
 
-// readUserData() {
-//     var uid = FirebaseAuth.instance.currentUser!.uid;
-//     FirebaseFirestore.instance.collection("users").doc(uid).get().then((user) {
-//       print(user.data());
-//       var userData = user.data()!;
-//       _nameUpdate.text = userData["username"];
-//       _emailUpdate.text = userData["email"];
-//       _mobileUpdate.text = userData["mobile"];
-//       imageURL = userData["imageURL"];
-//       // image = '"' + imageURL + '"';
-//       print(imageURL);
+  var ImgUpdate = [];
 
-//       // _ageCtrl.text = userData["age"];
-//     });
+  uploadImage() async {
+    var picker = ImagePicker();
+    var pickedFiles = await picker.pickMultiImage();
+    if (pickedFiles!.isNotEmpty) {
+      ImgUpdate.clear();
+      for (var image in pickedFiles) {
+        File img = File(image.path);
+        var rng = Random();
+        FirebaseStorage.instance
+            .ref()
+            .child("images")
+            .child(rng.nextInt(10000).toString())
+            .putFile(img)
+            .then((res) {
+          res.ref.getDownloadURL().then((url) {
+            setState(() {
+              ImgUpdate.add(url);
+            });
+          });
+        }).catchError((e) {});
+      }
+    }
+  }
 
-//     FirebaseFirestore.instance.collection("users").get().then((user) {
-//       print(user.docs);
-//       user.docs.forEach((user) {
-//         print(user.data());
-//       });
-//     });
+  updateAd() {
+    var uid = FirebaseAuth.instance.currentUser!.uid;
 
-//     FirebaseFirestore.instance.collection("users").snapshots().listen((user) {
-//       print(user.docs);
-//       user.docs.forEach((user) {
-//         print(user.data());
-//       });
-//     });
-//   }
+    FirebaseFirestore.instance.collection("ads").doc(uid).update({
+      "username": _titleUpdate.text,
+      "email": _descriptionUpdate.text,
+      "price": _priceUpdate.text,
+      "mobile": _mobileUpdate.text,
+      "imageURL": ImgUpdate,
+    }).then((value) {
+      print("Update Ad");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +106,7 @@ class _EditAdState extends State<EditAd> {
 
               // tooltip: 'Increase volume by 10',
               onPressed: () {
-                // uploadMultiple();
+                uploadImage();
               },
             ),
             Text('Tap to Upload'),
@@ -110,8 +123,9 @@ class _EditAdState extends State<EditAd> {
                       margin: EdgeInsets.only(left: 10, right: 10),
                       height: 70,
                       width: 70,
-                      child: Image.network(widget.imgURL[index],
-                          fit: BoxFit.cover),
+                      child: Image.network(
+                        widget.imgURL[index],
+                      ),
                     )
                   ],
                 );
@@ -132,7 +146,7 @@ class _EditAdState extends State<EditAd> {
                       ),
                       border: new OutlineInputBorder(
                           borderSide: new BorderSide(color: Colors.black26)),
-                      // labelText: '$title',
+                      labelText: 'Title',
                       labelStyle: TextStyle(color: Colors.black54),
                     ),
                   ),
@@ -147,7 +161,7 @@ class _EditAdState extends State<EditAd> {
                       ),
                       border: new OutlineInputBorder(
                           borderSide: new BorderSide(color: Colors.black26)),
-                      // labelText: '$title',
+                      labelText: 'Price',
                       labelStyle: TextStyle(color: Colors.black54),
                     ),
                   ),
@@ -162,7 +176,7 @@ class _EditAdState extends State<EditAd> {
                       ),
                       border: new OutlineInputBorder(
                           borderSide: new BorderSide(color: Colors.black26)),
-                      // labelText: '$title',
+                      labelText: 'Mobile',
                       labelStyle: TextStyle(color: Colors.black54),
                     ),
                   ),
@@ -177,8 +191,26 @@ class _EditAdState extends State<EditAd> {
                       ),
                       border: new OutlineInputBorder(
                           borderSide: new BorderSide(color: Colors.black26)),
-                      // labelText: '$title',
+                      labelText: 'Description',
                       labelStyle: TextStyle(color: Colors.black54),
+                    ),
+                  ),
+                  SizedBox(
+                    child: Container(
+                      height: 30,
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        primary: Colors.deepOrange,
+                        minimumSize: Size(double.infinity, 50)),
+                    onPressed: () {
+                      updateAd();
+                      Get.to(HomeScreen());
+                    },
+                    child: Text(
+                      'Update Ad',
+                      style: TextStyle(color: Colors.white, fontSize: 15),
                     ),
                   ),
                 ],
@@ -186,5 +218,7 @@ class _EditAdState extends State<EditAd> {
             )
           ],
         )));
+
+    // ));
   }
 }

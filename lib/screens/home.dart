@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   var ads = [];
 
-  allAds(){
+  allAds() {
     var uid = FirebaseAuth.instance.currentUser!.uid;
     FirebaseFirestore.instance
         .collection("ads")
@@ -94,12 +94,11 @@ class _HomeScreenState extends State<HomeScreen> {
         itemBuilder: (BuildContext context, index) {
           return GestureDetector(
             onTap: () => Get.to(ContactDetail(
-              imgURL: ads[index]['imageURL'],
+              imgURL: ads[index]['imageURL'][0],
               // id: _adds[index]['_id'],
               title: ads[index]['title'],
               description: ads[index]['description'],
               price: ads[index]['price'],
-           
             )),
             child: Stack(
               children: [
@@ -110,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: double.infinity,
                     width: double.infinity,
                     child: Image.network(
-                      "${ads[index]['imageURL']}",
+                      "${ads[index]['imageURL'][0]}",
                       fit: BoxFit.cover,
                     ),
                   ),

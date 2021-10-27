@@ -21,32 +21,29 @@ class _CreateAdState extends State<CreateAd> {
   TextEditingController _descriptionCtrl = TextEditingController();
   TextEditingController _priceCtrl = TextEditingController();
   TextEditingController _mobileCtrl = TextEditingController();
-  var imageURL = "";
+  var imageURL = [];
 
   uploadImage() async {
     var picker = ImagePicker();
-    var pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile!.path.length != 0) {
-      File image = File(pickedFile.path);
-      var rng = new Random();
-
-      FirebaseStorage.instance
-          .ref()
-          .child("images")
-          .child(rng.nextInt(10000).toString())
-          .putFile(image)
-          .then((res) {
-        print(res);
-        res.ref.getDownloadURL().then((url) {
-          setState(() {
-            imageURL = url;
+    var pickedFiles = await picker.pickMultiImage();
+    if (pickedFiles!.isNotEmpty) {
+      imageURL.clear();
+      for (var image in pickedFiles) {
+        File img = File(image.path);
+        var rng = Random();
+        FirebaseStorage.instance
+            .ref()
+            .child("images")
+            .child(rng.nextInt(10000).toString())
+            .putFile(img)
+            .then((res) {
+          res.ref.getDownloadURL().then((url) {
+            setState(() {
+              imageURL.add(url);
+            });
           });
-        });
-      }).catchError((e) {
-        print(e);
-      });
-    } else {
-      print("No file picked");
+        }).catchError((e) {});
+      }
     }
   }
 
@@ -96,13 +93,24 @@ class _CreateAdState extends State<CreateAd> {
                   IconButton(
                     icon: const Icon(Icons.add_a_photo_outlined),
                     iconSize: 50,
-
-                    // tooltip: 'Increase volume by 10',
                     onPressed: () {
                       uploadImage();
                     },
                   ),
                   Text('Tap to Upload'),
+                  imageURL.isNotEmpty
+                      ? Container(
+                          width: 90,
+                          height: 90,
+                          child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: imageURL.length,
+                              itemBuilder: (bc, index) {
+                                return Image.network(
+                                  imageURL[index],
+                                );
+                              }))
+                      : Container(),
                   Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: Column(
@@ -114,15 +122,15 @@ class _CreateAdState extends State<CreateAd> {
                           ),
                           TextField(
                             controller: _titleCtrl,
-                            style: TextStyle(color: Colors.black),
-                            decoration: new InputDecoration(
+                            style: const TextStyle(color: Colors.black),
+                            decoration: const InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                     color: Colors.black26, width: 2.0),
                               ),
-                              border: new OutlineInputBorder(
+                              border: OutlineInputBorder(
                                   borderSide:
-                                      new BorderSide(color: Colors.black26)),
+                                      BorderSide(color: Colors.black26)),
                               labelText: 'Title',
                               labelStyle: TextStyle(color: Colors.black26),
                             ),
@@ -134,7 +142,7 @@ class _CreateAdState extends State<CreateAd> {
                           ),
                           TextField(
                             controller: _priceCtrl,
-                            style: TextStyle(color: Colors.black),
+                            style: const TextStyle(color: Colors.black),
                             decoration: new InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
@@ -198,6 +206,7 @@ class _CreateAdState extends State<CreateAd> {
                                 minimumSize: Size(double.infinity, 50)),
                             onPressed: () {
                               createAd();
+                              Get.to(HomeScreen());
                             },
                             child: Text(
                               'Submit Ad ',
